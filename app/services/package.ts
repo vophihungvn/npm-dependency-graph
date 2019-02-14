@@ -1,7 +1,8 @@
 import * as http from "http";
 import * as querystring from "querystring";
 import * as GraphBuilder from "npmgraphbuilder";
-import { PackageGraph, Edge } from "./package.d";
+import { PackageGraph } from "./package.d";
+import cache from "./cache";
 
 const Graph = require("ngraph.graph");
 
@@ -27,34 +28,45 @@ class PackageService {
   graphBuilder: any;
 
   constructor() {
-    console.log(Graph);
     this.graph = Graph();
     this.graphBuilder = GraphBuilder(httpClient);
   }
 
-  async getGraph(pkgName: String): Promise<PackageGraph> {
+  async getGraph(pkgName: String): Promise<PackageGraph | any> {
     const packageInfo: PackageGraph = {
       nodes: [],
       edges: []
     };
 
-    const graphData = await this.graphBuilder.createNpmDependenciesGraph(
-      pkgName,
-      this.graph
-    );
+    try {
+      const cacheKey = cache.getKey(pkgName);
+      const cached = await cache.get(cacheKey);
+      if (cached) {
+        return cached;
+      }
 
-    graphData.forEachNode(function(node) {
-      packageInfo.nodes.push(node.data.name);
-    });
+      const graphData = await this.graphBuilder.createNpmDependenciesGraph(
+        pkgName,
+        this.graph
+      );
 
-    graphData.forEachLink(link => {
-      packageInfo.edges.push({
-        from: link.fromId.split("@")[0],
-        to: link.toId.split("@")[0]
+      graphData.forEachNode(function(node) {
+        packageInfo.nodes.push(node.data.name);
       });
-    });
 
-    return packageInfo;
+      graphData.forEachLink(link => {
+        packageInfo.edges.push({
+          from: link.fromId.split("@")[0],
+          to: link.toId.split("@")[0]
+        });
+      });
+      await cache.set(cacheKey, packageInfo);
+      return packageInfo;
+    } catch (error) {
+      return {
+        message: "Something wrong"
+      };
+    }
   }
 }
 

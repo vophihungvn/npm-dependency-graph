@@ -5,8 +5,7 @@
     "pretty": true,
     "sourceMap": true,
     "target": "es6",
-    "outDir": "./dist",
-    "baseUrl": "./app"
+    "outDir": "./dist"
   },
   "include": ["**/*.ts"],
   "exclude": ["node_modules"]

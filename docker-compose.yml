@@ -1,0 +1,27 @@
+version: "3"
+
+services:
+  npm-dependency-graph:
+    image: npm-dependency-graph
+    build: .
+    environment:
+      NODE_ENV: production
+      REDIS_HOST: redis
+    ports:
+      - 3000:3000
+    links:
+      - redis
+    depends_on:
+      - redis
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+
+  redis:
+    image: redis:4.0.5-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    hostname: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - ~/redis-data:/data
