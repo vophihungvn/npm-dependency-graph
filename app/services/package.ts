@@ -45,10 +45,9 @@ class PackageService {
         return cached;
       }
 
-      const graphData = await this.graphBuilder.createNpmDependenciesGraph(
-        pkgName,
-        this.graph
-      );
+      const graphData = await GraphBuilder(
+        httpClient
+      ).createNpmDependenciesGraph(pkgName, this.graph);
 
       graphData.forEachNode(function(node) {
         packageInfo.nodes.push(node.data.name);
