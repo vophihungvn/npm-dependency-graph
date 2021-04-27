@@ -19,7 +19,7 @@
     "mongoose": "^5.4.3",
     "ngraph.graph": "^0.0.15",
     "npmgraphbuilder": "^2.2.0",
-    "redis": "^2.8.0",
+    "redis": "^3.1.1",
     "ts-node": "^7.0.1",
     "typescript": "^3.3.3"
   },
